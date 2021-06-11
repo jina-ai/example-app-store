@@ -9,8 +9,8 @@ This is a simple example to show how to build an AI-powered search engine for an
 ### Clone this repo
 
 ```shell
-git clone foo
-cd foo
+git clone git@github.com:alexcg1/jina-app-store-example.git
+cd jina-app-store-example
 ```
 
 ### Create a virtual environment
@@ -50,6 +50,7 @@ You'll need to do this after every reboot. Or you can [read the instructions](ht
 `app.py` indexes the dataset then opens up a REST gateway for you to search:
 
 ```shell
+cd backend
 python app.py
 ```
 
@@ -59,7 +60,7 @@ In another terminal:
 
 ```sh
 pip install streamlit
-cd foo/frontend
+cd jina-app-store-example/frontend
 streamlit app.py
 ```
 
