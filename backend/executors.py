@@ -1,4 +1,5 @@
 from typing import Optional, Dict, Tuple
+from appstore_config import my_model, my_top_k
 
 import numpy as np
 import torch
@@ -12,7 +13,7 @@ class MyTransformer(Executor):
 
     def __init__(
         self,
-        pretrained_model_name_or_path: str = 'distilbert-base-uncased',
+        pretrained_model_name_or_path: str = my_model,
         base_tokenizer_model: Optional[str] = None,
         pooling_strategy: str = 'mean',
         layer_index: int = -1,
@@ -90,7 +91,7 @@ class MyIndexer(Executor):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._docs = DocumentArray()
-        self.top_k = 10
+        self.top_k = my_top_k
 
     @requests(on='/index')
     def index(self, docs: 'DocumentArray', **kwargs):

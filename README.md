@@ -1,8 +1,86 @@
-1. Create venv
-2. `pip install --pre jina[http]`
-3. `jina hello fork chatbot backend`
-4. `pip install transformers torch`
-5. `python app.py` to test
-6. Download [dataset](https://www.kaggle.com/tristan581/17k-apple-app-store-strategy-games)
-7. Move `appstore_games.csv` to `./data` 
-8. Edit files to make it work
+# AI-powered app store search
+
+![](./video.gif)
+
+This is a simple example to show how to build an AI-powered search engine for an app store using the [Jina](https://github.com/jina-ai/jina/) framework. It indexes and searches a subset of the [17K Mobile Strategy Games dataset](https://www.kaggle.com/tristan581/17k-apple-app-store-strategy-games) from Kaggle.
+
+## Instructions
+
+### Clone this repo
+
+```shell
+git clone foo
+cd foo
+```
+
+### Create a virtual environment
+
+We wouldn't want our project clashing with our system libraries, now would we?
+
+```shell
+virtualenv env --python=python3.8 # Other Python versions may work too. YMMV
+source env/bin/activate
+```
+
+### Install everything
+
+Make sure you're in your virtual environment first!
+
+```shell
+pip install --pre jina[http,transformers,torch]
+pip install pretty_errors # Makes error messages more readable
+```
+
+### Increase your swap space
+
+We're dealing with big language models and quite long text passages. Macs can apparently dynamically allocate swap space, but on Manjaro Linux I manually created and activated a swapfile. Otherwise my computer with 16gb of RAM will just freeze up while indexing.
+
+```shell
+# Don't bother if you're on a Mac or have loads of memory
+dd if=/dev/zero of=swapfile bs=1M count=10240 status=progress
+chmod 600 swapfile
+mkswap swapfile
+swapon swapfile
+```
+
+You'll need to do this after every reboot. Or you can [read the instructions](https://wiki.archlinux.org/title/Swap#Manually) to mount it at startup.
+
+### Run the program
+
+`app.py` indexes the dataset then opens up a REST gateway for you to search:
+
+```shell
+python app.py
+```
+
+### Start the front end
+
+In another terminal:
+
+```sh
+pip install streamlit
+cd foo/frontend
+streamlit app.py
+```
+
+Then open http://localhost:8501 in your browser
+
+### Search from the terminal
+
+```shell
+curl --request POST -d '{"top_k":10,"mode":"search","data":["hello world"]}' -H 'Content-Type: application/json' 'http://0.0.0.0:8080/search'
+```
+
+Where `hello world` is your query.
+
+The results should be a big chunk of JSON containing the matching apps. Or at least something close to matching. By default we're only indexing 1,000 apps from a list that's a few years old (since this is just an example) so don't be surprised if your search for a specific title doesn't come up.
+
+## FAQ
+
+### Why this dataset?
+
+It contains a lot of metadata, including (working) links to icons. I want to build a nice front-end to show off the search experience so graphical assets are vital. Plus stuff like ratings, descriptions, the works.
+
+### The download/purchase buttons don't do anything
+
+This is just a demo search engine. It has no functionality beyond that. 
