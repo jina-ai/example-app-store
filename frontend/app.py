@@ -50,8 +50,34 @@ def get_price_string(price, currency="$"):
 
     return price_string
 
+# st.set_page_config(layout="wide")
+
+# layout
+max_width = 1200
+padding_top = 2
+padding_bottom = 2
+padding_left = 2
+padding_right = 2
 
 
+st.markdown(
+        f"""
+<style>
+    .reportview-container .main .block-container{{
+        max-width: {max_width}px;
+        padding-top: {padding_top}rem;
+        padding-right: {padding_right}rem;
+        padding-left: {padding_left}rem;
+        padding-bottom: {padding_bottom}rem;
+    }}
+    .reportview-container .main {{
+        color: "#111";
+        background-color: "#eee";
+    }}
+</style>
+""",
+        unsafe_allow_html=True,
+    )
 
 st.title("Jina App Store Search")
 
@@ -69,11 +95,35 @@ if st.button(label="Search"):
 
         all_cells = [cell1, cell2, cell3, cell4, cell5, cell6, cell7, cell8, cell9]
 
-        for cell, match in zip(all_cells, matches):
-            cell.image(match["tags"]["Icon URL"])
-            cell.markdown(f'**{match["tags"]["Name"]}**')
-            cell.markdown(get_star_string(match["tags"]["Average User Rating"]))
-            cell.markdown(f'*{match["tags"]["Genres"]}*')
-            cell.markdown(f'{shorten_string(match["text"])}')
-            if cell.button(label=get_price_string(match["tags"]["Price"]), key=match["id"]):
-                st.balloons()
+        # for cell, match in zip(all_cells, matches):
+            # cell.image(match["tags"]["Icon URL"])
+            # cell.markdown(f'**{match["tags"]["Name"]}**')
+            # cell.markdown(get_star_string(match["tags"]["Average User Rating"]))
+            # cell.markdown(f'*{match["tags"]["Genres"]}*')
+            # cell.markdown(f'{shorten_string(match["text"])}')
+            # if cell.button(label=get_price_string(match["tags"]["Price"]), key=match["id"]):
+                # st.balloons()
+
+        for match in matches:
+            col1, col2 = st.beta_columns([1, 4])
+            with col1:
+                st.image(match["tags"]["Icon URL"])
+
+            with col2:
+                st.markdown(f'**[{match["tags"]["Name"]}]({match["tags"]["URL"]})**     {get_star_string(match["tags"]["Average User Rating"])}')
+                st.markdown(f'*{match["tags"]["Genres"]}*')
+                st.markdown(f'{shorten_string(match["text"], word_count=50)}')
+                st.button(label=get_price_string(match["tags"]["Price"]), key=match["id"])
+
+st.sidebar.title("Jina App Store Search")
+st.sidebar.markdown("""
+This is an example app store search engine.
+
+- Backend: [Jina](https://github.com/jina-ai/jina/)
+- Frontend: [Streamlit](https://www.streamlit.io/)
+- Dataset: [Kaggle](https://www.kaggle.com/tristan581/17k-apple-app-store-strategy-games)
+
+Only the search engine part of this app store works. We don't host apps, and we certainly don't sell them!
+
+[Visit the repo](https://github.com/alexcg1/jina-app-store-example)
+""")
