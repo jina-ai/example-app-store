@@ -65,9 +65,6 @@ if __name__ == "__main__":
     args = set_hw_chatbot_parser().parse_args()
     args.port_expose = my_port
     args.workdir = my_workdir
-    print(args)
-    import sys
-    sys.exit()
 
     docs = prep_docs(input_file="./data/1000.csv")
 
