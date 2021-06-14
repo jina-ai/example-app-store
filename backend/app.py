@@ -33,7 +33,6 @@ def prep_docs(input_file, max_docs=1000):
             doc.tags = row
             # del doc.tags[input_field]
             # doc = Document(content="foo")
-            print(doc)
             docs.extend([doc])
 
     # docs.prune()
@@ -42,7 +41,7 @@ def prep_docs(input_file, max_docs=1000):
 
 def run(inputs, args, top_k=10):
     """
-    Execute the chatbot example.
+    Execute the app store example.
 
     :param args: arguments passed from CLI
     """
@@ -62,10 +61,8 @@ def run(inputs, args, top_k=10):
 
 if __name__ == "__main__":
 
-    args = set_hw_chatbot_parser().parse_args(); pprint(args)
+    args = set_hw_chatbot_parser().parse_args()
 
     docs = prep_docs(input_file="./data/1000.csv")
-    print(docs)
-    print(len(docs))
 
     run(inputs=docs, args=args)
