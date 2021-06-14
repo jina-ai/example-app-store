@@ -5,6 +5,7 @@ from jina.types.arrays.memmap import DocumentArrayMemmap
 from jina import Flow, Document, DocumentArray
 from jina.parsers.helloworld import set_hw_chatbot_parser
 import csv
+from appstore_config import my_port, my_workdir
 
 if __name__ == "__main__":
     from executors import MyTransformer, MyIndexer
@@ -39,7 +40,7 @@ def prep_docs(input_file, max_docs=1000):
     return docs
 
 
-def run(inputs, args, top_k=10):
+def run_appstore(inputs, args):
     """
     Execute the app store example.
 
@@ -62,7 +63,12 @@ def run(inputs, args, top_k=10):
 if __name__ == "__main__":
 
     args = set_hw_chatbot_parser().parse_args()
+    args.port_expose = my_port
+    args.workdir = my_workdir
+    print(args)
+    import sys
+    sys.exit()
 
     docs = prep_docs(input_file="./data/1000.csv")
 
-    run(inputs=docs, args=args)
+    run_appstore(inputs=docs, args=args)
