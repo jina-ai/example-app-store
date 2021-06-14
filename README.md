@@ -18,7 +18,7 @@ cd jina-app-store-example
 We wouldn't want our project clashing with our system libraries, now would we?
 
 ```shell
-virtualenv env --python=python3.8 # Other Python versions may work too. YMMV
+virtualenv env --python=python3.8 # Python versions >= 3.7 work fine
 source env/bin/activate
 ```
 
@@ -27,8 +27,7 @@ source env/bin/activate
 Make sure you're in your virtual environment first!
 
 ```shell
-pip install --pre jina[http,transformers,torch]
-pip install pretty_errors # Makes error messages more readable
+pip install -r requirements.txt
 ```
 
 ### Increase your swap space
@@ -59,8 +58,9 @@ python app.py
 In another terminal:
 
 ```sh
-pip install streamlit
-cd jina-app-store-example/frontend
+cd jina-app-store-example/
+source env/bin/activate
+cd frontend
 streamlit app.py
 ```
 
@@ -69,7 +69,7 @@ Then open http://localhost:8501 in your browser
 ### Search from the terminal
 
 ```shell
-curl --request POST -d '{"top_k":10,"mode":"search","data":["hello world"]}' -H 'Content-Type: application/json' 'http://0.0.0.0:8080/search'
+curl --request POST -d '{"top_k":10,"mode":"search","data":["hello world"]}' -H 'Content-Type: application/json' 'http://0.0.0.0:45678/search'
 ```
 
 Where `hello world` is your query.
@@ -85,3 +85,7 @@ It contains a lot of metadata, including (working) links to icons. I want to bui
 ### The download/purchase buttons don't do anything
 
 This is just a demo search engine. It has no functionality beyond that. 
+
+### How can I change basic settings?
+
+Edit `backend/appstore_config.py`
