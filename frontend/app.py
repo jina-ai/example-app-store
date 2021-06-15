@@ -82,7 +82,7 @@ st.markdown(
 
 st.title("Jina App Store Search")
 
-query = st.text_input(label="Search", help="What kind of game are you looking for?")
+query = st.text_input(label="Search mobile games by keywords or category e.g. fun games, knights and warriors, etc.")
 
 if st.button(label="Search"):
     if not query:
