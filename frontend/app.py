@@ -5,7 +5,7 @@ import requests
 image_size = 128
 
 
-def get_data(query: str, my_endpoint: str, top_k: int) -> dict:
+def get_data(query: str, endpoint: str, top_k: int) -> dict:
     headers = {
         "Content-Type": "application/json",
     }
@@ -85,6 +85,7 @@ if st.button(label="Search"):
         st.markdown("Please enter a query")
     else:
 
+        my_endpoint = "http://3.138.155.170:45678/search"
         matches = get_data(query=query, endpoint=my_endpoint, top_k=10)
         cell1, cell2, cell3 = st.beta_columns(3)
         cell4, cell5, cell6 = st.beta_columns(3)
