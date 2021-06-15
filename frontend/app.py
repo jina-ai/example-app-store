@@ -58,10 +58,7 @@ def get_price_string(price, currency="$"):
 
 # layout
 max_width = 1200
-padding_top = 2
-padding_bottom = 2
-padding_left = 2
-padding_right = 2
+padding = 2
 
 
 st.markdown(
@@ -69,10 +66,10 @@ st.markdown(
 <style>
     .reportview-container .main .block-container{{
         max-width: {max_width}px;
-        padding-top: {padding_top}rem;
-        padding-right: {padding_right}rem;
-        padding-left: {padding_left}rem;
-        padding-bottom: {padding_bottom}rem;
+        padding-top: {padding}rem;
+        padding-right: {padding}rem;
+        padding-left: {padding}rem;
+        padding-bottom: {padding}rem;
     }}
     .reportview-container .main {{
         color: "#111";
@@ -106,13 +103,24 @@ if st.button(label="Search"):
                 st.image(match["tags"]["Icon URL"])
 
             with col2:
-                st.markdown(
-                    f'**[{sanitize_string(match["tags"]["Name"])}]({match["tags"]["URL"]})**     {get_star_string(match["tags"]["Average User Rating"])}'
-                )
-                st.markdown(f'*{match["tags"]["Genres"]}*')
-                st.markdown(
-                    f'{shorten_string(sanitize_string(match["text"]), word_count=50)}'
-                )
+                app_name = f'**[{sanitize_string(match["tags"]["Name"])}]({match["tags"]["URL"]})**'
+                app_rating = f'{get_star_string(match["tags"]["Average User Rating"])}'
+                app_genres = f'<small>{match["tags"]["Genres"]}</small>'
+                app_desc = shorten_string(sanitize_string(match["text"]), word_count=50)
+
+                st.markdown(f"""
+                            {app_name}\t{app_rating}\n
+                            {app_genres}\n
+                            {app_desc}
+                            """, unsafe_allow_html=True)
+
+                # st.markdown(
+                    # f'**[{sanitize_string(match["tags"]["Name"])}]({match["tags"]["URL"]})**     {get_star_string(match["tags"]["Average User Rating"])}'
+                # )
+                # st.markdown(f'<small>{match["tags"]["Genres"]}</small>', unsafe_allow_html=True)
+                # st.markdown(
+                    # f'{shorten_string(sanitize_string(match["text"]), word_count=50)}'
+                # )
                 st.button(
                     label=get_price_string(match["tags"]["Price"]), key=match["id"]
                 )
@@ -121,6 +129,8 @@ st.sidebar.title("Jina App Store Search")
 st.sidebar.markdown(
     """
 This is an example app store search engine.
+
+**Note: click the search button instead of hitting Enter. We're working on fixing this!**
 
 - Backend: [Jina](https://github.com/jina-ai/jina/)
 - Frontend: [Streamlit](https://www.streamlit.io/)
