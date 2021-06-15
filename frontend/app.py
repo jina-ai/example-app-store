@@ -128,7 +128,7 @@ if st.button(label="Search"):
 st.sidebar.title("Jina App Store Search")
 st.sidebar.markdown(
     """
-This is an example app store search engine.
+This is an example app store search engine using the [Jina neural search framework](https://github.com/jina-ai/jina/).
 
 **Note: click the search button instead of hitting Enter. We're working on fixing this!**
 
@@ -139,5 +139,7 @@ This is an example app store search engine.
 Only the search engine part of this app store works. We don't host apps, and we certainly don't sell them!
 
 [Visit the repo](https://github.com/alexcg1/jina-app-store-example)
-"""
+
+<a href="https://github.com/jina-ai/jina/"><img src="https://github.com/alexcg1/jina-app-store-example/blob/a8f64332c6a5b3ae42df07d4bd615ff1b7ece4d9/frontend/powered_by_jina.png?raw=true" width=256></a>
+""", unsafe_allow_html=True
 )
