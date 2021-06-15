@@ -1,4 +1,5 @@
 import streamlit as st
+import ast
 from appstore_config import my_endpoint
 import requests
 
@@ -28,9 +29,9 @@ def shorten_string(string, word_count=20, suffix="..."):
 
 
 def sanitize_string(string: str) -> str:
-    output = string.encode("ascii", "ignore").decode()
+    escaped_string = string.encode("utf-8").decode("unicode_escape")
 
-    return output
+    return escaped_string
 
 
 def get_star_string(rating, max_rating=5, full_star="★", empty_star="☆"):
@@ -109,7 +110,9 @@ if st.button(label="Search"):
                     f'**[{sanitize_string(match["tags"]["Name"])}]({match["tags"]["URL"]})**     {get_star_string(match["tags"]["Average User Rating"])}'
                 )
                 st.markdown(f'*{match["tags"]["Genres"]}*')
-                st.markdown(f'{shorten_string(sanitize_string(match["text"]), word_count=50)}')
+                st.markdown(
+                    f'{shorten_string(sanitize_string(match["text"]), word_count=50)}'
+                )
                 st.button(
                     label=get_price_string(match["tags"]["Price"]), key=match["id"]
                 )
