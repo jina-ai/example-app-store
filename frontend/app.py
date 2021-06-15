@@ -5,7 +5,7 @@ import requests
 image_size = 128
 
 
-def get_data(query: str, endpoint: str, top_k: int) -> dict:
+def get_data(query: str, my_endpoint: str, top_k: int) -> dict:
     headers = {
         "Content-Type": "application/json",
     }
