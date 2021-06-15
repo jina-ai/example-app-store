@@ -27,6 +27,12 @@ def shorten_string(string, word_count=20, suffix="..."):
     return output
 
 
+def sanitize_string(string: str) -> str:
+    output = string.encode("ascii", "ignore").decode()
+
+    return output
+
+
 def get_star_string(rating, max_rating=5, full_star="★", empty_star="☆"):
     try:
         rating = float(rating)
@@ -100,10 +106,10 @@ if st.button(label="Search"):
 
             with col2:
                 st.markdown(
-                    f'**[{match["tags"]["Name"]}]({match["tags"]["URL"]})**     {get_star_string(match["tags"]["Average User Rating"])}'
+                    f'**[{sanitize_string(match["tags"]["Name"])}]({match["tags"]["URL"]})**     {get_star_string(match["tags"]["Average User Rating"])}'
                 )
                 st.markdown(f'*{match["tags"]["Genres"]}*')
-                st.markdown(f'{shorten_string(match["text"], word_count=50)}')
+                st.markdown(f'{shorten_string(sanitize_string(match["text"]), word_count=50)}')
                 st.button(
                     label=get_price_string(match["tags"]["Price"]), key=match["id"]
                 )
