@@ -1,12 +1,15 @@
 import os
 from pprint import pprint
-import pretty_errors
 from jina import Flow, Document, DocumentArray
 from jina.parsers.helloworld import set_hw_chatbot_parser
 import csv
 from backend_config import backend_port, backend_workdir, backend_datafile
 from executors import MyTransformer, MyIndexer
 
+try:
+    __import__("pretty_errors")
+except ImportError:
+    pass
 
 def trim_string(input_string: str, word_count: int = 50, sep: str = " ") -> str:
     """
