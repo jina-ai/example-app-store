@@ -4,19 +4,31 @@ import pretty_errors
 from jina import Flow, Document, DocumentArray
 from jina.parsers.helloworld import set_hw_chatbot_parser
 import csv
-from backend_config import my_port, my_workdir, my_datafile
+from backend_config import backend_port, backend_workdir, backend_datafile
 from executors import MyTransformer, MyIndexer
 
 
-def trim_string(input_string, word_count=50, sep=" "):
-    sanitized_string = input_string.replace("\\n", sep).replace("\\u2022", sep)
+def trim_string(input_string: str, word_count: int = 50, sep: str = " ") -> str:
+    """
+    Trim a string to a certain number of words.
+    :param input_string: string to trim
+    :param word_count: how many words to trim to
+    :param sep: separator between words
+    :return: trimmmed string
+    """
+    sanitized_string = input_string.replace("\\n", sep)
     words = sanitized_string.split(sep)[:word_count]
-    output = " ".join(words)
+    trimmed_string = " ".join(words)
 
-    return output
+    return trimmed_string
 
 
-def prep_docs(input_file):
+def prep_docs(input_file: str) -> DocumentArray:
+    """
+    Create DocumentArray consisting of every row in csv as a Document
+    :param input_file: Input csv filename
+    :return: populated DocumentArray
+    """
     docs = DocumentArray()
     with open(input_file, "r") as csv_file:
         csv_reader = csv.DictReader(csv_file)
@@ -30,29 +42,46 @@ def prep_docs(input_file):
     return docs
 
 
-def run_appstore(inputs, args):
+def run_appstore_flow(inputs, args) -> None:
     """
-    Execute the app store example.
+    Execute the app store example. Indexes data and presents REST endpoint
+    :param inputs: Documents or DocumentArrays to input
+    :args: arguments like port, workdir, etc
+    :return: None
     """
 
-    f = (
+    # Create Flow and add
+    #   - MyTransformer (an encoder Executor)
+    #   - MyIndexer (a simple indexer Executor)
+    flow = (
         Flow()
         .add(uses=MyTransformer, parallel=args.parallel)
         .add(uses=MyIndexer, workspace=args.workdir)
     )
 
-    with f:
-        f.post(on="/index", inputs=inputs, on_done=print)
-        f.use_rest_gateway(args.port_expose)
-        f.block()
+    # Open the Flow
+    with flow:
+        # Start index pipeline, taking inputs then printing the processed DocumentArray
+        flow.post(on="/index", inputs=inputs, on_done=print)
+        
+        # Start REST gateway so clients can query via Streamlit or other frontend (like Jina Box) 
+        flow.use_rest_gateway(args.port_expose)
+
+        # Block the process to keep it open. Otherwise it will just close and no-one could connect
+        flow.block()
 
 
 if __name__ == "__main__":
 
+    # Get chatbot's default arguments
     args = set_hw_chatbot_parser().parse_args()
-    args.port_expose = my_port
-    args.workdir = my_workdir
 
-    docs = prep_docs(input_file=my_datafile)
+    # Change a few things
+    args.port_expose = backend_port
+    args.workdir = backend_workdir
 
-    run_appstore(inputs=docs, args=args)
+    # Convert the csv file to a DocumentArray
+    docs = prep_docs(input_file=backend_datafile)
+
+    # Run the Flow
+    run_appstore_flow(inputs=docs, args=args)
