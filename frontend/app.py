@@ -1,6 +1,6 @@
 import streamlit as st
 import ast
-from appstore_config import frontend_endpoint
+from frontend_config import frontend_endpoint
 import requests
 
 image_size = 128
