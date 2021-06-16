@@ -1,5 +1,5 @@
 from typing import Optional, Dict, Tuple
-from appstore_config import my_model, my_top_k
+from backend_config import backend_model, backend_top_k
 
 import numpy as np
 import torch
@@ -7,19 +7,23 @@ from transformers import AutoModel, AutoTokenizer
 
 from jina import Executor, DocumentArray, requests, Document
 
+## READ THIS: This is almost copied 100% from the chatbot example. I don't understand what's _actually_ happening in these Executors, especially the Transformer.
+# When Jina Hub 2.0 is released we can remove this file and simply get Executors direct from the Hub
+# The Executors below are deliberately simple and not built for power use (e.g. indexer stores everything in memory, so have to re-index on every run)
+
 
 class MyTransformer(Executor):
     """Transformer executor class """
 
     def __init__(
         self,
-        pretrained_model_name_or_path: str = my_model,
+        pretrained_model_name_or_path: str = backend_model,
         base_tokenizer_model: Optional[str] = None,
-        pooling_strategy: str = 'mean',
+        pooling_strategy: str = "mean",
         layer_index: int = -1,
         max_length: Optional[int] = None,
         acceleration: Optional[str] = None,
-        embedding_fn_name: str = '__call__',
+        embedding_fn_name: str = "__call__",
         *args,
         **kwargs,
     ):
@@ -37,42 +41,42 @@ class MyTransformer(Executor):
         self.model = AutoModel.from_pretrained(
             self.pretrained_model_name_or_path, output_hidden_states=True
         )
-        self.model.to(torch.device('cpu'))
+        self.model.to(torch.device("cpu"))
 
-    def _compute_embedding(self, hidden_states: 'torch.Tensor', input_tokens: Dict):
+    def _compute_embedding(self, hidden_states: "torch.Tensor", input_tokens: Dict):
         import torch
 
-        fill_vals = {'cls': 0.0, 'mean': 0.0, 'max': -np.inf, 'min': np.inf}
+        fill_vals = {"cls": 0.0, "mean": 0.0, "max": -np.inf, "min": np.inf}
         fill_val = torch.tensor(
-            fill_vals[self.pooling_strategy], device=torch.device('cpu')
+            fill_vals[self.pooling_strategy], device=torch.device("cpu")
         )
 
         layer = hidden_states[self.layer_index]
-        attn_mask = input_tokens['attention_mask'].unsqueeze(-1).expand_as(layer)
+        attn_mask = input_tokens["attention_mask"].unsqueeze(-1).expand_as(layer)
         layer = torch.where(attn_mask.bool(), layer, fill_val)
 
         embeddings = layer.sum(dim=1) / attn_mask.sum(dim=1)
         return embeddings.cpu().numpy()
 
     @requests
-    def encode(self, docs: 'DocumentArray', *args, **kwargs):
+    def encode(self, docs: "DocumentArray", *args, **kwargs):
         import torch
 
         with torch.no_grad():
 
             if not self.tokenizer.pad_token:
-                self.tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+                self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
                 self.model.resize_token_embeddings(len(self.tokenizer.vocab))
 
             input_tokens = self.tokenizer(
-                docs.get_attributes('content'),
+                docs.get_attributes("content"),
                 max_length=self.max_length,
-                padding='longest',
+                padding="longest",
                 truncation=True,
-                return_tensors='pt',
+                return_tensors="pt",
             )
             input_tokens = {
-                k: v.to(torch.device('cpu')) for k, v in input_tokens.items()
+                k: v.to(torch.device("cpu")) for k, v in input_tokens.items()
             }
 
             outputs = getattr(self.model, self.embedding_fn_name)(**input_tokens)
@@ -91,16 +95,16 @@ class MyIndexer(Executor):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._docs = DocumentArray()
-        self.top_k = my_top_k
+        self.top_k = backend_top_k
 
-    @requests(on='/index')
-    def index(self, docs: 'DocumentArray', **kwargs):
+    @requests(on="/index")
+    def index(self, docs: "DocumentArray", **kwargs):
         self._docs.extend(docs)
 
-    @requests(on='/search')
-    def search(self, docs: 'DocumentArray', **kwargs):
-        a = np.stack(docs.get_attributes('embedding'))
-        b = np.stack(self._docs.get_attributes('embedding'))
+    @requests(on="/search")
+    def search(self, docs: "DocumentArray", **kwargs):
+        a = np.stack(docs.get_attributes("embedding"))
+        b = np.stack(self._docs.get_attributes("embedding"))
         q_emb = _ext_A(_norm(a))
         d_emb = _ext_B(_norm(b))
         dists = _cosine(q_emb, d_emb)
@@ -113,8 +117,8 @@ class MyIndexer(Executor):
 
     @staticmethod
     def _get_sorted_top_k(
-        dist: 'np.array', top_k: int
-    ) -> Tuple['np.ndarray', 'np.ndarray']:
+        dist: "np.array", top_k: int
+    ) -> Tuple["np.ndarray", "np.ndarray"]:
         if top_k >= dist.shape[1]:
             idx = dist.argsort(axis=1)[:, :top_k]
             dist = np.take_along_axis(dist, idx, axis=1)
