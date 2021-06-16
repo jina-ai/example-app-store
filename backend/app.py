@@ -1,16 +1,11 @@
 import os
 from pprint import pprint
 import pretty_errors
-from jina.types.arrays.memmap import DocumentArrayMemmap
 from jina import Flow, Document, DocumentArray
 from jina.parsers.helloworld import set_hw_chatbot_parser
 import csv
-from appstore_config import my_port, my_workdir, my_datafile
-
-if __name__ == "__main__":
-    from executors import MyTransformer, MyIndexer
-else:
-    from .executors import MyTransformer, MyIndexer
+from backend_config import my_port, my_workdir, my_datafile
+from executors import MyTransformer, MyIndexer
 
 
 def trim_string(input_string, word_count=50, sep=" "):
@@ -21,9 +16,7 @@ def trim_string(input_string, word_count=50, sep=" "):
     return output
 
 
-def prep_docs(input_file, max_docs=1000):
-    # docs = DocumentArrayMemmap("./mem_map")
-    # docs.clear()
+def prep_docs(input_file):
     docs = DocumentArray()
     with open(input_file, "r") as csv_file:
         csv_reader = csv.DictReader(csv_file)
@@ -32,19 +25,14 @@ def prep_docs(input_file, max_docs=1000):
             input_data = trim_string(row[input_field])
             doc = Document(text=input_data)
             doc.tags = row
-            # del doc.tags[input_field]
-            # doc = Document(content="foo")
             docs.extend([doc])
 
-    # docs.prune()
     return docs
 
 
 def run_appstore(inputs, args):
     """
     Execute the app store example.
-
-    :param args: arguments passed from CLI
     """
 
     f = (
@@ -53,7 +41,6 @@ def run_appstore(inputs, args):
         .add(uses=MyIndexer, workspace=args.workdir)
     )
 
-    # # index it!
     with f:
         f.post(on="/index", inputs=inputs, on_done=print)
         f.use_rest_gateway(args.port_expose)

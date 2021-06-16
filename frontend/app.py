@@ -1,6 +1,6 @@
 import streamlit as st
 import ast
-from appstore_config import my_endpoint
+from appstore_config import frontend_endpoint
 import requests
 
 image_size = 128
@@ -13,7 +13,7 @@ def get_data(query: str, endpoint: str, top_k: int) -> dict:
 
     data = '{"top_k":' + str(top_k) + ',"mode":"search","data":["' + query + '"]}'
 
-    response = requests.post(my_endpoint, headers=headers, data=data)
+    response = requests.post(frontend_endpoint, headers=headers, data=data)
     content = response.json()
 
     matches = content["data"]["docs"][0]["matches"]
@@ -89,8 +89,8 @@ if st.button(label="Search"):
         st.markdown("Please enter a query")
     else:
 
-        my_endpoint = "http://3.138.155.170:45678/search"
-        matches = get_data(query=query, endpoint=my_endpoint, top_k=10)
+        frontend_endpoint = "http://3.138.155.170:45678/search"
+        matches = get_data(query=query, endpoint=frontend_endpoint, top_k=10)
         cell1, cell2, cell3 = st.beta_columns(3)
         cell4, cell5, cell6 = st.beta_columns(3)
         cell7, cell8, cell9 = st.beta_columns(3)
