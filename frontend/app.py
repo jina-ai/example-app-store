@@ -88,7 +88,6 @@ if st.button(label="Search"):
         st.markdown("Please enter a query")
     else:
 
-        frontend_endpoint = "http://3.138.155.170:45678/search"
         matches = get_data(query=query, endpoint=frontend_endpoint, top_k=10)
         cell1, cell2, cell3 = st.beta_columns(3)
         cell4, cell5, cell6 = st.beta_columns(3)
