@@ -33,11 +33,9 @@ def prep_docs(input_file: str, max_docs=max_docs):
     """
     Create DocumentArray consisting of every row in csv as a Document
     :param input_file: Input csv filename
-    :return: populated DocumentArray
+    :return: populated Document Generator
     """
-    # docs = DocumentArray()
-    docs = DocumentArrayMemmap('./my-memmap')
-    docs.clear() # Clear just in case
+
     with open(input_file, "r") as csv_file:
         csv_reader = csv.DictReader(csv_file)
         input_field = "Description"
@@ -45,9 +43,7 @@ def prep_docs(input_file: str, max_docs=max_docs):
             input_data = trim_string(row[input_field])
             doc = Document(text=input_data)
             doc.tags = row
-            docs.extend([doc])
-
-    return docs
+            yield doc
 
 
 def run_appstore_flow(inputs, args) -> None:
