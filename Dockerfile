@@ -7,6 +7,8 @@ RUN pip install -r requirements.txt
 
 WORKDIR "backend"
 
+RUN python get_data.py
+
 ENTRYPOINT ["python", "app.py"]
 
 LABEL author="Alex C-G (alex.cg@jina.ai)"
