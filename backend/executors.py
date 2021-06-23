@@ -2,6 +2,7 @@ from typing import Optional, Dict, Tuple
 from backend_config import backend_model, backend_top_k
 
 import numpy as np
+import os
 import torch
 from transformers import AutoModel, AutoTokenizer
 
@@ -164,3 +165,101 @@ def _norm(A):
 
 def _cosine(A_norm_ext, B_norm_ext):
     return A_norm_ext.dot(B_norm_ext).clip(min=0) / 2
+
+
+
+class EmbeddingIndexer(Executor):
+    def __init__(self, index_file_name: str, **kwargs):
+        super().__init__(**kwargs)
+        self.index_file_name = index_file_name
+        if os.path.exists(self.save_path):
+            self._docs = DocumentArray.load(self.save_path)
+        else:
+            self._docs = DocumentArray()
+
+    @property
+    def save_path(self):
+        if not os.path.exists(self.workspace):
+            os.makedirs(self.workspace)
+        return os.path.join(self.workspace, self.index_file_name)
+
+    def close(self):
+        self._docs.save(self.save_path)
+
+    @requests(on='/index')
+    def index(self, docs: 'DocumentArray', **kwargs) -> DocumentArray:
+        embedding_docs = DocumentArray()
+        for doc in docs:
+            embedding_docs.append(Document(id=doc.id, embedding=doc.embedding))
+        self._docs.extend(embedding_docs)
+        return docs
+
+    @requests(on='/search')
+    def search(self, docs: 'DocumentArray', parameters: Dict, **kwargs) \
+            -> DocumentArray:
+        a = np.stack(docs.get_attributes('embedding'))
+        b = np.stack(self._docs.get_attributes('embedding'))
+        q_emb = _ext_A(_norm(a))
+        d_emb = _ext_B(_norm(b))
+        dists = _cosine(q_emb, d_emb)
+        top_k = int(parameters.get('top_k', 5))
+        assert top_k > 0
+        idx, dist = self._get_sorted_top_k(dists, top_k)
+        for _q, _ids, _dists in zip(docs, idx, dist):
+            for _id, _dist in zip(_ids, _dists):
+                doc = Document(self._docs[int(_id)], copy=True)
+                doc.score.value = 1 - _dist
+                doc.parent_id = int(_id)
+                _q.matches.append(doc)
+        return docs
+
+    @staticmethod
+    def _get_sorted_top_k(
+        dist: 'np.array', top_k: int
+    ) -> Tuple['np.ndarray', 'np.ndarray']:
+        if top_k >= dist.shape[1]:
+            idx = dist.argsort(axis=1)[:, :top_k]
+            dist = np.take_along_axis(dist, idx, axis=1)
+        else:
+            idx_ps = dist.argpartition(kth=top_k, axis=1)[:, :top_k]
+            dist = np.take_along_axis(dist, idx_ps, axis=1)
+            idx_fs = dist.argsort(axis=1)
+            idx = np.take_along_axis(idx_ps, idx_fs, axis=1)
+            dist = np.take_along_axis(dist, idx_fs, axis=1)
+
+        return idx, dist
+
+
+class KeyValueIndexer(Executor):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if os.path.exists(self.save_path):
+            self._docs = DocumentArray.load(self.save_path)
+        else:
+            self._docs = DocumentArray()
+
+    @property
+    def save_path(self):
+        if not os.path.exists(self.workspace):
+            os.makedirs(self.workspace)
+        return os.path.join(self.workspace, 'kv.json')
+
+    def close(self):
+        self._docs.save(self.save_path)
+
+    @requests(on='/index')
+    def index(self, docs: DocumentArray, **kwargs) -> DocumentArray:
+        self._docs.extend(docs)
+        return docs
+
+    @requests(on='/search')
+    def query(self, docs: DocumentArray, **kwargs) -> DocumentArray:
+        for doc in docs:
+            for match in doc.matches:
+                extracted_doc = self._docs[int(match.parent_id)]
+                # The id fields should be the same
+                assert match.id == extracted_doc.id
+                match.MergeFrom(extracted_doc)
+        return docs
+
+
