@@ -14,20 +14,14 @@ from backend_config import (
     backend_port,
     backend_workdir,
 )
+from executors import MyTransformer, DiskIndexer
 
-# from executors import MyTransformer
-
-from jina import Flow, DocumentArray, Document
-
-# from jina.types.document.generators import from_files
-# from jina.logging import default_logger as logger
+from jina import Flow, Document
 
 try:
     __import__("pretty_errors")
 except ImportError:
     pass
-# IMAGE_SRC = 'data/**/*.png'
-# MAX_DOCS = int(os.environ.get('JINA_MAX_DOCS', 50000))
 
 os.environ["JINA_WORKSPACE"] = backend_workdir
 os.environ["JINA_PORT"] = os.environ.get("JINA_PORT", str(backend_port))
@@ -67,28 +61,35 @@ def prep_docs(input_file: str, max_docs=max_docs):
             yield doc
 
 
-def index():
-    # docs = prep_docs(input_file=backend_datafile, max_docs=max_docs)
-    # Runs indexing for all images
-    # num_docs = min(num_docs, len(glob(os.path.join(os.getcwd(), IMAGE_SRC),
-    # recursive=True)))
+indexer_executor = DiskIndexer
 
-    with Flow.load_config("flows/index.yml") as flow:
+
+def index():
+    flow = (
+        Flow()
+        .add(uses=MyTransformer, parallel=1, name="encoder")
+        .add(uses=indexer_executor, workspace=backend_workdir, name="indexer")
+    )
+
+    with flow:
         flow.post(
             on="/index",
-            inputs=DocumentArray(
-                prep_docs(input_file=backend_datafile, max_docs=max_docs)
-            ),
+            inputs=prep_docs(input_file=backend_datafile, max_docs=max_docs),
             request_size=64,
             read_mode="r",
         )
 
 
 def query_restful():
-    # Starts the restful query API
-    flow = Flow.load_config("flows/query.yml")
-    flow.use_rest_gateway()
+    flow = (
+        Flow()
+        .add(uses=MyTransformer, name="encoder")
+        .add(uses=indexer_executor, workspace=backend_workdir, name="indexer")
+    )
+
     with flow:
+        flow.protocol = "http"
+        flow.port_expose = backend_port
         flow.block()
 
 
