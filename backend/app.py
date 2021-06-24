@@ -1,12 +1,22 @@
+__copyright__ = "Copyright (c) 2021 Jina AI Limited. All rights reserved."
+__license__ = "Apache-2.0"
+
 import os
 import itertools
-from pprint import pprint
-from jina import Flow, Document, DocumentArray
-from jina.types.arrays.memmap import DocumentArrayMemmap
-from jina.parsers.helloworld import set_hw_chatbot_parser
 import csv
-from backend_config import backend_port, backend_workdir, backend_datafile, text_length, max_docs
-from executors import MyTransformer, MyIndexer
+import shutil
+import click
+import sys
+from backend_config import (
+    text_length,
+    max_docs,
+    backend_datafile,
+    backend_port,
+    backend_workdir,
+)
+from executors import MyTransformer, DiskIndexer
+
+from jina import Flow, Document
 
 try:
     __import__("pretty_errors")
@@ -14,7 +24,9 @@ except ImportError:
     pass
 
 
-def trim_string(input_string: str, word_count: int = text_length, sep: str = " ") -> str:
+def trim_string(
+    input_string: str, word_count: int = text_length, sep: str = " "
+) -> str:
     """
     Trim a string to a certain number of words.
     :param input_string: string to trim
@@ -46,48 +58,67 @@ def prep_docs(input_file: str, max_docs=max_docs):
             yield doc
 
 
-def run_appstore_flow(inputs, args) -> None:
-    """
-    Execute the app store example. Indexes data and presents REST endpoint
-    :param inputs: Documents or DocumentArrays to input
-    :args: arguments like port, workdir, etc
-    :return: None
-    """
-
-    # Create Flow and add
-    #   - MyTransformer (an encoder Executor)
-    #   - MyIndexer (a simple indexer Executor)
+def index():
     flow = (
         Flow()
-        .add(uses=MyTransformer, parallel=args.parallel)
-        # .add(uses=EmbeddingIndexer)
-        # .add(uses=KeyValueIndexer)
-        .add(uses=MyIndexer, workspace=args.workdir)
+        .add(uses=MyTransformer, parallel=2, name="encoder")
+        .add(uses=DiskIndexer, workspace=backend_workdir, name="indexer")
     )
-    # flow = Flow.load_config('flows/index.yml')
 
-    # Open the Flow
     with flow:
-        # Start index pipeline, taking inputs then printing the processed DocumentArray
-        flow.post(on="/index", inputs=inputs)
+        flow.post(
+            on="/index",
+            inputs=prep_docs(input_file=backend_datafile, max_docs=max_docs),
+            request_size=64,
+            read_mode="r",
+        )
 
-        # Start REST gateway so clients can query via Streamlit or other frontend (like Jina Box)
-        flow.use_rest_gateway(backend_port)
 
-        # Block the process to keep it open. Otherwise it will just close and no-one could connect
+def query_restful():
+    flow = (
+        Flow()
+        .add(uses=MyTransformer, name="encoder")
+        .add(uses=DiskIndexer, workspace=backend_workdir, name="indexer")
+    )
+
+    with flow:
+        flow.protocol = "http"
+        flow.port_expose = backend_port
         flow.block()
 
 
+@click.command()
+@click.option(
+    "--task",
+    "-t",
+    type=click.Choice(["index", "query_restful"], case_sensitive=False),
+)
+@click.option("--num_docs", "-n", default=max_docs)
+@click.option("--force", "-f", is_flag=True)
+def main(task: str, num_docs: int, force: bool):
+    workspace = backend_workdir
+    if task == "index":
+        if os.path.exists(workspace):
+            if force:
+                shutil.rmtree(workspace)
+            else:
+                print(
+                    f"\n +----------------------------------------------------------------------------------+ \
+                        \n |                                   🤖🤖🤖                                         | \
+                        \n | The directory {workspace} already exists. Please remove it before indexing again.  | \
+                        \n |                                   🤖🤖🤖                                         | \
+                        \n +----------------------------------------------------------------------------------+"
+                )
+                sys.exit(1)
+        index()
+    if task == "query_restful":
+        if not os.path.exists(workspace):
+            print(
+                f"The directory {workspace} does not exist. Please index first via `python app.py -t index`"
+            )
+            sys.exit(1)
+        query_restful()
+
+
 if __name__ == "__main__":
-
-    # Get chatbot's default arguments
-    args = set_hw_chatbot_parser().parse_args()
-
-    # Change a few things
-    args.workdir = backend_workdir
-
-    # Convert the csv file to a DocumentArray
-    docs = prep_docs(input_file=backend_datafile)
-
-    # Run the Flow
-    run_appstore_flow(inputs=docs, args=args)
+    main()

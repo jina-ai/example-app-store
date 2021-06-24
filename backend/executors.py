@@ -2,6 +2,7 @@ from typing import Optional, Dict, Tuple
 from backend_config import backend_model, backend_top_k
 
 import numpy as np
+import os
 import torch
 from transformers import AutoModel, AutoTokenizer
 
@@ -89,49 +90,6 @@ class MyTransformer(Executor):
                 doc.embedding = embed
 
 
-class MyIndexer(Executor):
-    """Simple indexer class """
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._docs = DocumentArray()
-        self.top_k = backend_top_k
-
-    @requests(on="/index")
-    def index(self, docs: "DocumentArray", **kwargs):
-        self._docs.extend(docs)
-
-    @requests(on="/search")
-    def search(self, docs: "DocumentArray", **kwargs):
-        a = np.stack(docs.get_attributes("embedding"))
-        b = np.stack(self._docs.get_attributes("embedding"))
-        q_emb = _ext_A(_norm(a))
-        d_emb = _ext_B(_norm(b))
-        dists = _cosine(q_emb, d_emb)
-        idx, dist = self._get_sorted_top_k(dists, self.top_k)
-        for _q, _ids, _dists in zip(docs, idx, dist):
-            for _id, _dist in zip(_ids, _dists):
-                d = Document(self._docs[int(_id)], copy=True)
-                d.score.value = 1 - _dist
-                _q.matches.append(d)
-
-    @staticmethod
-    def _get_sorted_top_k(
-        dist: "np.array", top_k: int
-    ) -> Tuple["np.ndarray", "np.ndarray"]:
-        if top_k >= dist.shape[1]:
-            idx = dist.argsort(axis=1)[:, :top_k]
-            dist = np.take_along_axis(dist, idx, axis=1)
-        else:
-            idx_ps = dist.argpartition(kth=top_k, axis=1)[:, :top_k]
-            dist = np.take_along_axis(dist, idx_ps, axis=1)
-            idx_fs = dist.argsort(axis=1)
-            idx = np.take_along_axis(idx_ps, idx_fs, axis=1)
-            dist = np.take_along_axis(dist, idx_fs, axis=1)
-
-        return idx, dist
-
-
 def _get_ones(x, y):
     return np.ones((x, y))
 
@@ -164,3 +122,63 @@ def _norm(A):
 
 def _cosine(A_norm_ext, B_norm_ext):
     return A_norm_ext.dot(B_norm_ext).clip(min=0) / 2
+
+
+
+class DiskIndexer(Executor):
+    """Simple indexer class """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._docs = DocumentArray()
+        self.top_k = backend_top_k
+        if os.path.exists(self.save_path):
+            self._docs = DocumentArray.load(self.save_path)
+        else:
+            self._docs = DocumentArray()
+
+    @property
+    def save_path(self):
+        if not os.path.exists(self.workspace):
+            os.makedirs(self.workspace)
+        return os.path.join(self.workspace, 'apps.json')
+
+    def close(self):
+        self._docs.save(self.save_path)
+
+
+    @requests(on="/index")
+    def index(self, docs: "DocumentArray", **kwargs):
+        self._docs.extend(docs)
+        return docs
+
+    @requests(on="/search")
+    def search(self, docs: "DocumentArray", **kwargs):
+        a = np.stack(docs.get_attributes("embedding"))
+        b = np.stack(self._docs.get_attributes("embedding"))
+        q_emb = _ext_A(_norm(a))
+        d_emb = _ext_B(_norm(b))
+        dists = _cosine(q_emb, d_emb)
+        idx, dist = self._get_sorted_top_k(dists, self.top_k)
+        for _q, _ids, _dists in zip(docs, idx, dist):
+            for _id, _dist in zip(_ids, _dists):
+                d = Document(self._docs[int(_id)], copy=True)
+                # d.score.value = 1 - _dist
+                _q.matches.append(d)
+        return docs
+
+    @staticmethod
+    def _get_sorted_top_k(
+        dist: "np.array", top_k: int
+    ) -> Tuple["np.ndarray", "np.ndarray"]:
+        if top_k >= dist.shape[1]:
+            idx = dist.argsort(axis=1)[:, :top_k]
+            dist = np.take_along_axis(dist, idx, axis=1)
+        else:
+            idx_ps = dist.argpartition(kth=top_k, axis=1)[:, :top_k]
+            dist = np.take_along_axis(dist, idx_ps, axis=1)
+            idx_fs = dist.argsort(axis=1)
+            idx = np.take_along_axis(idx_ps, idx_fs, axis=1)
+            dist = np.take_along_axis(dist, idx_fs, axis=1)
+
+        return idx, dist
