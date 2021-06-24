@@ -23,9 +23,6 @@ try:
 except ImportError:
     pass
 
-os.environ["JINA_WORKSPACE"] = backend_workdir
-os.environ["JINA_PORT"] = os.environ.get("JINA_PORT", str(backend_port))
-
 
 def trim_string(
     input_string: str, word_count: int = text_length, sep: str = " "
@@ -61,14 +58,11 @@ def prep_docs(input_file: str, max_docs=max_docs):
             yield doc
 
 
-indexer_executor = DiskIndexer
-
-
 def index():
     flow = (
         Flow()
-        .add(uses=MyTransformer, parallel=1, name="encoder")
-        .add(uses=indexer_executor, workspace=backend_workdir, name="indexer")
+        .add(uses=MyTransformer, parallel=2, name="encoder")
+        .add(uses=DiskIndexer, workspace=backend_workdir, name="indexer")
     )
 
     with flow:
@@ -84,7 +78,7 @@ def query_restful():
     flow = (
         Flow()
         .add(uses=MyTransformer, name="encoder")
-        .add(uses=indexer_executor, workspace=backend_workdir, name="indexer")
+        .add(uses=DiskIndexer, workspace=backend_workdir, name="indexer")
     )
 
     with flow:
@@ -102,7 +96,7 @@ def query_restful():
 @click.option("--num_docs", "-n", default=max_docs)
 @click.option("--force", "-f", is_flag=True)
 def main(task: str, num_docs: int, force: bool):
-    workspace = os.environ["JINA_WORKSPACE"]
+    workspace = backend_workdir
     if task == "index":
         if os.path.exists(workspace):
             if force:
