@@ -30,7 +30,7 @@ Make sure you're in your virtual environment first!
 pip install -r requirements.txt
 ```
 
-### Increase your swap space
+### Increase your swap space (optional)
 
 We're dealing with big language models and quite long text passages. Macs can apparently dynamically allocate swap space, but on Manjaro Linux I manually created and activated a swapfile. Otherwise my computer with 16gb of RAM will just freeze up while indexing.
 
@@ -44,13 +44,19 @@ swapon swapfile
 
 You'll need to do this after every reboot. Or you can [read the instructions](https://wiki.archlinux.org/title/Swap#Manually) to mount it at startup.
 
-### Run the program
-
-`app.py` indexes the dataset then opens up a REST gateway for you to search:
+### Index your data
 
 ```shell
 cd backend
-python app.py
+python app.py -t index
+```
+
+### Search your data
+
+`app.py` accepts an input query via a REST gateway:
+
+```shell
+python app.py -query_restful
 ```
 
 ### Start the front end
@@ -88,4 +94,4 @@ This is just a demo search engine. It has no functionality beyond that.
 
 ### How can I change basic settings?
 
-Edit `backend/appstore_config.py`
+Edit `backend/backend_config.py`
