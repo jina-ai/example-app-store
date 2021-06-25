@@ -13,10 +13,13 @@ from backend_config import (
     backend_datafile,
     backend_port,
     backend_workdir,
+    backend_model,
 )
-# from executors import MyTransformer
-# from executors import DiskIndexer
+
 from executors.disk_indexer import DiskIndexer
+from executors.rankers import ReviewRanker
+from executors.encoders import MyTransformer
+import random
 
 from jina import Flow, Document
 
@@ -43,18 +46,25 @@ def trim_string(
     return trimmed_string
 
 
-def prep_docs(input_file: str, max_docs=max_docs):
+def prep_docs(input_file: str, max_docs:int=max_docs):
     """
-    Create DocumentArray consisting of every row in csv as a Document
+    Create generator for every row in csv as a Document
     :param input_file: Input csv filename
-    :return: populated Document Generator
+    :return: Generator
     """
 
     with open(input_file, "r") as csv_file:
         csv_reader = csv.DictReader(csv_file)
         input_field = "Description"
         for row in itertools.islice(csv_reader, max_docs):
-            input_data = trim_string(row[input_field])
+            # Fix invalid ratings and counts
+            if row["Average User Rating"] == "":
+                row["Average User Rating"] = random.uniform(0.0, 5.0)
+            if row["User Rating Count"] == "":
+                row["User Rating Count"] = random.randint(10, 10_000)
+            # Set field to encode and index
+            input_data = trim_string(f"{row['Name']} - {trim_string(row[input_field])}")
+            # Put all of that into a doc
             doc = Document(text=input_data)
             doc.tags = row
             yield doc
@@ -63,8 +73,12 @@ def prep_docs(input_file: str, max_docs=max_docs):
 def index():
     flow = (
         Flow()
-        .add(uses='jinahub+docker://TransformerTorchEncoder', pretrained_model_name_or_path="sentence-transformers/msmarco-distilbert-base-v3", name="encoder", max_length=50)
-        .add(uses=DiskIndexer, workspace=backend_workdir, name="indexer")
+        # .add(uses='jinahub+docker://TransformerTorchEncoder', pretrained_model_name_or_path="sentence-transformers/msmarco-distilbert-base-v3", name="encoder", max_length=50)
+        .add(
+            uses=MyTransformer,
+            pretrained_model_name_or_path=backend_model,
+            name="encoder",
+        ).add(uses=DiskIndexer, workspace=backend_workdir, name="indexer")
     )
 
     with flow:
@@ -79,8 +93,13 @@ def index():
 def query_restful():
     flow = (
         Flow()
-        .add(uses='jinahub+docker://TransformerTorchEncoder', pretrained_model_name_or_path="sentence-transformers/msmarco-distilbert-base-v3", name="encoder", max_length=50)
-        .add(uses=DiskIndexer, workspace=backend_workdir, name="indexer")
+        # .add(uses='jinahub+docker://TransformerTorchEncoder', pretrained_model_name_or_path="sentence-transformers/msmarco-distilbert-base-v3", name="encoder", max_length=50)
+        .add(
+            uses=MyTransformer,
+            pretrained_model_name_or_path=backend_model,
+            name="encoder",
+        ).add(uses=DiskIndexer, workspace=backend_workdir, name="indexer")
+        # .add(uses=ReviewRanker, name="ranker")
     )
 
     with flow:
