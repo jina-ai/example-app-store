@@ -46,7 +46,7 @@ def trim_string(
     return trimmed_string
 
 
-def prep_docs(input_file: str, max_docs:int=max_docs):
+def prep_docs(input_file: str, num_docs:int=max_docs):
     """
     Create generator for every row in csv as a Document
     :param input_file: Input csv filename
@@ -56,7 +56,7 @@ def prep_docs(input_file: str, max_docs:int=max_docs):
     with open(input_file, "r") as csv_file:
         csv_reader = csv.DictReader(csv_file)
         input_field = "Description"
-        for row in itertools.islice(csv_reader, max_docs):
+        for row in itertools.islice(csv_reader, num_docs):
             # Fix invalid ratings and counts
             if row["Average User Rating"] == "":
                 row["Average User Rating"] = random.uniform(0.0, 5.0)
@@ -70,7 +70,7 @@ def prep_docs(input_file: str, max_docs:int=max_docs):
             yield doc
 
 
-def index():
+def index(num_docs=max_docs):
     flow = (
         Flow()
         # .add(uses='jinahub+docker://TransformerTorchEncoder', pretrained_model_name_or_path="sentence-transformers/msmarco-distilbert-base-v3", name="encoder", max_length=50)
@@ -84,7 +84,7 @@ def index():
     with flow:
         flow.post(
             on="/index",
-            inputs=prep_docs(input_file=backend_datafile, max_docs=max_docs),
+            inputs=prep_docs(input_file=backend_datafile, num_docs=num_docs),
             request_size=64,
             read_mode="r",
         )
@@ -131,7 +131,7 @@ def main(task: str, num_docs: int, force: bool):
                         \n +----------------------------------------------------------------------------------+"
                 )
                 sys.exit(1)
-        index()
+        index(num_docs=num_docs)
     if task == "query_restful":
         if not os.path.exists(workspace):
             print(
