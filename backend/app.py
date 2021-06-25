@@ -14,7 +14,9 @@ from backend_config import (
     backend_port,
     backend_workdir,
 )
-from executors import MyTransformer, DiskIndexer
+# from executors import MyTransformer
+# from executors import DiskIndexer
+from executors.disk_indexer import DiskIndexer
 
 from jina import Flow, Document
 
@@ -61,7 +63,7 @@ def prep_docs(input_file: str, max_docs=max_docs):
 def index():
     flow = (
         Flow()
-        .add(uses=MyTransformer, parallel=2, name="encoder")
+        .add(uses='jinahub+docker://TransformerTorchEncoder', pretrained_model_name_or_path="sentence-transformers/msmarco-distilbert-base-v3", name="encoder", max_length=50)
         .add(uses=DiskIndexer, workspace=backend_workdir, name="indexer")
     )
 
@@ -77,7 +79,7 @@ def index():
 def query_restful():
     flow = (
         Flow()
-        .add(uses=MyTransformer, name="encoder")
+        .add(uses='jinahub+docker://TransformerTorchEncoder', pretrained_model_name_or_path="sentence-transformers/msmarco-distilbert-base-v3", name="encoder", max_length=50)
         .add(uses=DiskIndexer, workspace=backend_workdir, name="indexer")
     )
 
