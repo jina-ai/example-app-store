@@ -83,7 +83,7 @@ st.title("Jina App Store Search")
 
 query = st.text_input(label="Search mobile games by keywords or category e.g. fun games, knights and warriors, etc.")
 
-if st.button(label="Search"):
+if st.button(label="Search") or query:
     if not query:
         st.markdown("Please enter a query")
     else:
@@ -127,8 +127,6 @@ st.sidebar.title("Jina App Store Search")
 st.sidebar.markdown(
     """
 This is an example app store search engine using the [Jina neural search framework](https://github.com/jina-ai/jina/).
-
-**Note: click the search button instead of hitting Enter. We're working on fixing this!**
 
 - Backend: [Jina](https://github.com/jina-ai/jina/)
 - Frontend: [Streamlit](https://www.streamlit.io/)
