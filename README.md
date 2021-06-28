@@ -67,7 +67,7 @@ In another terminal:
 cd jina-app-store-example/
 source env/bin/activate
 cd frontend
-streamlit app.py
+streamlit run app.py
 ```
 
 Then open http://localhost:8501 in your browser
