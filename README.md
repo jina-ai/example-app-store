@@ -61,14 +61,14 @@ This command creates a directory called `data` and downloads the [17K Mobile Str
 python app.py -t index -n 1000
 ```
 
-💡 **Tip**: Use "-n" to specify number of apps to index
+💡 **Tip**: Use `-n` to specify number of apps to index
 
 ### Search your data
 
 `app.py` accepts an input query via a REST gateway:
 
 ```shell
-python app.py -query_restful
+python app.py -t query_restful
 ```
 
 ### Start the front end
