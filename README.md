@@ -94,7 +94,7 @@ Where `hello world` is your query.
 
 The results should be a big chunk of JSON containing the matching apps. Or at least something close to matching. By default we're only indexing 1,000 apps from a list that's a few years old (since this is just an example) so don't be surprised if your search for a specific title doesn't come up.
 
-💡 *Tip*: For cleaner formatting, pipe the contents of the above command into [`jq`](https://stedolan.github.io/jq/) by adding `| jq` to the end of the command.
+💡 **Tip**: For cleaner formatting, pipe the contents of the above command into [`jq`](https://stedolan.github.io/jq/) by adding `| jq` to the end of the command.
 
 ## What are all these files?
 
