@@ -44,12 +44,24 @@ swapon swapfile
 
 You'll need to do this after every reboot. Or you can [read the instructions](https://wiki.archlinux.org/title/Swap#Manually) to mount it at startup.
 
-### Index your data
+### Download dataset
 
 ```shell
 cd backend
-python app.py -t index
+python get_data.py
 ```
+
+This command creates a directory called `data` and downloads the [17K Mobile Strategy Games dataset](https://www.kaggle.com/tristan581/17k-apple-app-store-strategy-games) into it. It then shuffles it to ensure we get a diverse range of apps to search through.
+
+💡 **Tip**: We shuffle using a fixed random seed of `42`, so every shuffle will be the same. Want a different shuffle? Change it in [`backend_config.py`](./backend/backend_config.py)
+
+### Index your data
+
+```shell
+python app.py -t index -n 1000
+```
+
+💡 **Tip**: Use "-n" to specify number of apps to index
 
 ### Search your data
 
@@ -81,6 +93,8 @@ curl --request POST -d '{"top_k":10,"mode":"search","data":["hello world"]}' -H 
 Where `hello world` is your query.
 
 The results should be a big chunk of JSON containing the matching apps. Or at least something close to matching. By default we're only indexing 1,000 apps from a list that's a few years old (since this is just an example) so don't be surprised if your search for a specific title doesn't come up.
+
+💡 *Tip*: For cleaner formatting, pipe the contents of the above command into [`jq`](https://stedolan.github.io/jq/) by adding `| jq` to the end of the command.
 
 ## FAQ
 
