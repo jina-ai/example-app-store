@@ -98,20 +98,20 @@ The results should be a big chunk of JSON containing the matching apps. Or at le
 
 ## What are all these files?
 
-After downloading you'll see a lot of files. We're only concerned about the `backend` folder since that's where all the Jina magic happens: 
+After cloning, downloading the dataset and indexing data, you'll see a lot of files. We're only concerned about the `backend` folder since that's where all the Jina magic happens. Don't worry if you don't see all of these right away. Sometimes they'll only appear after downloading the dataset or indexing.
 
-|       | Filename                      | What is it?                                       | When will you see it?       |
-|-------|-------------------------------|---------------------------------------------------|-----------------------------|
-| 📂    | `data`                        | Folder for storing downloaded dataset             | After running `get_data.py` |
-| --&nbsp;📄 | `appstore_games.csv`          | Original dataset                                  | After running `get_data.py` |
-| -- 📄 | `appstore_games_shuffled.csv` | Processed dataset that we'll index                | After running `get_data.py` |
-| 📂    | `executors`                   | Folder to store Executors we write ourself        | After cloning repo          |
-| -- 📄 | `disk_indexer.py`             | Executor to build an on-disk index                | After cloning repo          |
-| 📂    | `workspace`                   | Folder to store indexed data                      | After indexing data         |
-| 📄    | `app.py`                      | Our main program file                             | After cloning repo          |
-| 📄    | `backend_config.py`           | Basic config settings                             | After cloning repo          |
-| 📄    | `get_data.py`                 | Script to retrieve dataset                        | After cloning repo          |
-| 📄    | `helper.py`                   | Helper functions go here to ensure clean `app.py` | After cloning repo          |
+|       | Filename                      | What is it?                                       |
+|-------|-------------------------------|---------------------------------------------------|
+| 📂    | `data`                        | Folder for storing downloaded dataset             |
+| -- 📄 | `appstore_games.csv`          | Original dataset                                  |
+| -- 📄 | `appstore_games_shuffled.csv` | Processed dataset that we'll index                |
+| 📂    | `executors`                   | Folder to store Executors we write ourself        |
+| -- 📄 | `disk_indexer.py`             | Executor to build an on-disk index                |
+| 📂    | `workspace`                   | Folder to store indexed data                      |
+| 📄    | `app.py`                      | Our main program file                             |
+| 📄    | `backend_config.py`           | Basic config settings                             |
+| 📄    | `get_data.py`                 | Script to retrieve dataset                        |
+| 📄    | `helper.py`                   | Helper functions go here to ensure clean `app.py` |
 
 You may also see several `__pycache__` folders with `.pyc` files. Don't worry about these. [They're explained here](https://stackoverflow.com/a/16869074) if you really want to know.
 
