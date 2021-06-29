@@ -1,5 +1,5 @@
 import streamlit as st
-from frontend_config import frontend_endpoint
+from frontend_config import endpoint, top_k
 import requests
 
 image_size = 128
@@ -12,7 +12,7 @@ def get_data(query: str, endpoint: str, top_k: int) -> dict:
 
     data = '{"top_k":' + str(top_k) + ',"mode":"search","data":["' + query + '"]}'
 
-    response = requests.post(frontend_endpoint, headers=headers, data=data)
+    response = requests.post(endpoint, headers=headers, data=data)
     content = response.json()
 
     matches = content["data"]["docs"][0]["matches"]
@@ -79,16 +79,45 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Setup sidebar
+st.sidebar.title("Jina App Store Search")
+
+settings = st.sidebar.beta_expander(label="Settings", expanded=False)
+with settings:
+    endpoint = st.text_input(label="Endpoint", value=endpoint)
+    top_k = st.number_input(label="Top K", value=top_k, step=1)
+
+st.sidebar.markdown(
+    """
+This is an example app store search engine using the [Jina neural search framework](https://github.com/jina-ai/jina/).
+
+**Note: click the search button instead of hitting Enter. We're working on fixing this!**
+
+- Backend: [Jina](https://github.com/jina-ai/jina/)
+- Frontend: [Streamlit](https://www.streamlit.io/)
+- Dataset: [Kaggle](https://www.kaggle.com/tristan581/17k-apple-app-store-strategy-games)
+
+Only the search engine part of this app store works. We don't host apps, and we certainly don't sell them!
+
+[Visit the repo](https://github.com/alexcg1/jina-app-store-example)
+
+<a href="https://github.com/jina-ai/jina/"><img src="https://github.com/alexcg1/jina-app-store-example/blob/a8f64332c6a5b3ae42df07d4bd615ff1b7ece4d9/frontend/powered_by_jina.png?raw=true" width=256></a>
+""",
+    unsafe_allow_html=True,
+)
+
 st.title("Jina App Store Search")
 
-query = st.text_input(label="Search mobile games by keywords or category e.g. fun games, knights and warriors, etc.")
+query = st.text_input(
+    label="Search mobile games by keywords or category e.g. fun games, knights and warriors, etc."
+)
 
 if st.button(label="Search"):
     if not query:
         st.markdown("Please enter a query")
     else:
 
-        matches = get_data(query=query, endpoint=frontend_endpoint, top_k=10)
+        matches = get_data(query=query, endpoint=endpoint, top_k=10)
         cell1, cell2, cell3 = st.beta_columns(3)
         cell4, cell5, cell6 = st.beta_columns(3)
         cell7, cell8, cell9 = st.beta_columns(3)
@@ -106,38 +135,23 @@ if st.button(label="Search"):
                 app_genres = f'<small>{match["tags"]["Genres"]}</small>'
                 app_desc = shorten_string(sanitize_string(match["text"]), word_count=50)
 
-                st.markdown(f"""
+                st.markdown(
+                    f"""
                             {app_name}\t{app_rating}\n
                             {app_genres}\n
                             {app_desc}
-                            """, unsafe_allow_html=True)
+                            """,
+                    unsafe_allow_html=True,
+                )
 
                 # st.markdown(
-                    # f'**[{sanitize_string(match["tags"]["Name"])}]({match["tags"]["URL"]})**     {get_star_string(match["tags"]["Average User Rating"])}'
+                # f'**[{sanitize_string(match["tags"]["Name"])}]({match["tags"]["URL"]})**     {get_star_string(match["tags"]["Average User Rating"])}'
                 # )
                 # st.markdown(f'<small>{match["tags"]["Genres"]}</small>', unsafe_allow_html=True)
                 # st.markdown(
-                    # f'{shorten_string(sanitize_string(match["text"]), word_count=50)}'
+                # f'{shorten_string(sanitize_string(match["text"]), word_count=50)}'
                 # )
                 st.button(
                     label=get_price_string(match["tags"]["Price"]), key=match["id"]
                 )
 
-st.sidebar.title("Jina App Store Search")
-st.sidebar.markdown(
-    """
-This is an example app store search engine using the [Jina neural search framework](https://github.com/jina-ai/jina/).
-
-**Note: click the search button instead of hitting Enter. We're working on fixing this!**
-
-- Backend: [Jina](https://github.com/jina-ai/jina/)
-- Frontend: [Streamlit](https://www.streamlit.io/)
-- Dataset: [Kaggle](https://www.kaggle.com/tristan581/17k-apple-app-store-strategy-games)
-
-Only the search engine part of this app store works. We don't host apps, and we certainly don't sell them!
-
-[Visit the repo](https://github.com/alexcg1/jina-app-store-example)
-
-<a href="https://github.com/jina-ai/jina/"><img src="https://github.com/alexcg1/jina-app-store-example/blob/a8f64332c6a5b3ae42df07d4bd615ff1b7ece4d9/frontend/powered_by_jina.png?raw=true" width=256></a>
-""", unsafe_allow_html=True
-)
