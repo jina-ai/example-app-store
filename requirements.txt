@@ -1,3 +1,4 @@
-jina[http,transformers,torch]==2.0.0rc9.dev22
+jina[http,transformers,torch,hub]==2.0.0rc9.dev22
 pretty-errors==1.2.21
 streamlit==0.82.0
+docker==5.0
