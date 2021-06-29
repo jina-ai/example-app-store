@@ -14,7 +14,7 @@ from backend_config import (
 )
 
 from executors.disk_indexer import DiskIndexer
-from helper import prep_docs
+from helper import prep_docs, deal_with_workspace
 from jina import Flow
 
 try:
@@ -80,25 +80,27 @@ def query_restful():
 def main(task: str, num_docs: int, force: bool):
     workspace = workdir
     if task == "index":
-        if os.path.exists(workspace):
-            if force:
-                shutil.rmtree(workspace)
-            else:
-                print(
-                    f"\n +----------------------------------------------------------------------------------+ \
-                        \n |                                   🤖🤖🤖                                         | \
-                        \n | The directory {workspace} already exists. Please remove it before indexing again.  | \
-                        \n |                                   🤖🤖🤖                                         | \
-                        \n +----------------------------------------------------------------------------------+"
-                )
-                sys.exit(1)
+        deal_with_workspace(dir_name=workspace, should_exist=False, force_remove=force)
+        # if os.path.exists(workspace):
+            # if force:
+                # shutil.rmtree(workspace)
+            # else:
+                # print(
+                    # f"\n +----------------------------------------------------------------------------------+ \
+                        # \n |                                   🤖🤖🤖                                         | \
+                        # \n | The directory {workspace} already exists. Please remove it before indexing again.  | \
+                        # \n |                                   🤖🤖🤖                                         | \
+                        # \n +----------------------------------------------------------------------------------+"
+                # )
+                # sys.exit(1)
         index(num_docs=num_docs)
     if task == "query_restful":
-        if not os.path.exists(workspace):
-            print(
-                f"The directory {workspace} does not exist. Please index first via `python app.py -t index`"
-            )
-            sys.exit(1)
+        deal_with_workspace(dir_name=workspace, should_exist=True)
+        # if not os.path.exists(workspace):
+            # print(
+                # f"The directory {workspace} does not exist. Please index first via `python app.py -t index`"
+            # )
+            # sys.exit(1)
         query_restful()
 
 
