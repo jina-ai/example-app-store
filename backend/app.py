@@ -5,13 +5,7 @@ import os
 import shutil
 import sys
 import click
-from backend_config import (
-    max_docs,
-    datafile,
-    port,
-    workdir,
-    model
-)
+from backend_config import max_docs, datafile, port, workdir, model
 
 from executors.disk_indexer import DiskIndexer
 from helper import prep_docs, deal_with_workspace
@@ -36,7 +30,7 @@ def index(num_docs: int = max_docs):
             name="encoder",
             max_length=50,
         )
-        .add(uses=DiskIndexer, workspace=workdir)
+        .add(uses=DiskIndexer, workspace=workdir, name="indexer")
     )
 
     with flow:
@@ -56,11 +50,11 @@ def query_restful():
         Flow()
         .add(
             uses="jinahub+docker://TransformerTorchEncoder",
-            pretrained_model_name_or_path="sentence-transformers/msmarco-distilbert-base-v3",
+            pretrained_model_name_or_path=model,
             name="encoder",
             max_length=50,
         )
-        .add(uses=DiskIndexer, workspace=workdir)
+        .add(uses=DiskIndexer, workspace=workdir, name="indexer")
     )
 
     with flow:
@@ -79,28 +73,13 @@ def query_restful():
 @click.option("--force", "-f", is_flag=True)
 def main(task: str, num_docs: int, force: bool):
     workspace = workdir
+
     if task == "index":
         deal_with_workspace(dir_name=workspace, should_exist=False, force_remove=force)
-        # if os.path.exists(workspace):
-            # if force:
-                # shutil.rmtree(workspace)
-            # else:
-                # print(
-                    # f"\n +----------------------------------------------------------------------------------+ \
-                        # \n |                                   🤖🤖🤖                                         | \
-                        # \n | The directory {workspace} already exists. Please remove it before indexing again.  | \
-                        # \n |                                   🤖🤖🤖                                         | \
-                        # \n +----------------------------------------------------------------------------------+"
-                # )
-                # sys.exit(1)
         index(num_docs=num_docs)
+
     if task == "query_restful":
         deal_with_workspace(dir_name=workspace, should_exist=True)
-        # if not os.path.exists(workspace):
-            # print(
-                # f"The directory {workspace} does not exist. Please index first via `python app.py -t index`"
-            # )
-            # sys.exit(1)
         query_restful()
 
 
