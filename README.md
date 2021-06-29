@@ -6,6 +6,12 @@ This is a simple example to show how to build an AI-powered search engine for an
 
 ## Instructions
 
+### Prerequisites
+
+- You have a Mac or Linux system
+- You have Python 3.7 or later installed, and have some basic Python knowledge
+- You understand basic git and terminal usage
+
 ### Clone this repo
 
 ```shell
