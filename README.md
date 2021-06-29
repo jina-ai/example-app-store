@@ -98,7 +98,7 @@ The results should be a big chunk of JSON containing the matching apps. Or at le
 
 ## What are all these files?
 
-After downloading you'll see a lot of files. Here's when you'll see them and what they're for
+After downloading you'll see a lot of files. We're only concerned about the `backend` folder since that's where all the Jina magic happens: 
 
 |       | Filename                      | What is it?                                       | When will you see it?       |
 |-------|-------------------------------|---------------------------------------------------|-----------------------------|
