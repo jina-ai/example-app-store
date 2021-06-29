@@ -69,7 +69,7 @@ def query_restful():
     type=click.Choice(["index", "query_restful"], case_sensitive=False),
 )
 @click.option("--num_docs", "-n", default=max_docs)
-@click.option("--force", "-f", is_flag=True)
+@click.option("--force", "-f", is_flag=True) # Delete workspace dir if already exists when indexing
 def main(task: str, num_docs: int, force: bool):
     workspace = workdir
 
