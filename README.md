@@ -96,7 +96,21 @@ The results should be a big chunk of JSON containing the matching apps. Or at le
 
 💡 **Tip**: For cleaner formatting, pipe the contents of the above command into [`jq`](https://stedolan.github.io/jq/) by adding `| jq` to the end of the command.
 
-## What are all these files?
+## FAQ
+
+### Why this dataset?
+
+It contains a lot of metadata, including (working) links to icons. I want to build a nice front-end to show off the search experience so graphical assets are vital. Plus stuff like ratings, descriptions, the works.
+
+### The download/purchase buttons don't do anything
+
+This is just a demo search engine. It has no functionality beyond that. 
+
+### How can I change basic settings?
+
+Edit `backend/backend_config.py`
+
+### What are all these files?
 
 After cloning, downloading the dataset and indexing data, you'll see a lot of files. We're only concerned about the `backend` folder since that's where all the Jina magic happens. Don't worry if you don't see all of these right away. Sometimes they'll only appear after downloading the dataset or indexing.
 
@@ -116,16 +130,3 @@ After cloning, downloading the dataset and indexing data, you'll see a lot of fi
 You may also see several `__pycache__` folders with `.pyc` files. Don't worry about these. [They're explained here](https://stackoverflow.com/a/16869074) if you really want to know.
 
 
-## FAQ
-
-### Why this dataset?
-
-It contains a lot of metadata, including (working) links to icons. I want to build a nice front-end to show off the search experience so graphical assets are vital. Plus stuff like ratings, descriptions, the works.
-
-### The download/purchase buttons don't do anything
-
-This is just a demo search engine. It has no functionality beyond that. 
-
-### How can I change basic settings?
-
-Edit `backend/backend_config.py`
