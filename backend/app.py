@@ -72,14 +72,12 @@ def query_restful():
 @click.option("--num_docs", "-n", default=max_docs)
 @click.option("--force", "-f", is_flag=True)
 def main(task: str, num_docs: int, force: bool):
-    workspace = workdir
-
     if task == "index":
-        deal_with_workspace(dir_name=workspace, should_exist=False, force_remove=force)
+        deal_with_workspace(dir_name=workdir, should_exist=False, force_remove=force)
         index(num_docs=num_docs)
 
     if task == "query_restful":
-        deal_with_workspace(dir_name=workspace, should_exist=True)
+        deal_with_workspace(dir_name=workdir, should_exist=True)
         query_restful()
 
 
