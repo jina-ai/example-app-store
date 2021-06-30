@@ -153,4 +153,5 @@ Thumbs.db
 # profiling data
 .prof
 
-
+# ctags
+tags
