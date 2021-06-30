@@ -8,6 +8,7 @@ import click
 from backend_config import max_docs, datafile, port, workdir, model
 
 from executors.disk_indexer import DiskIndexer
+from jinahub.text.encoders.transform_encoder import TransformerTorchEncoder
 from helper import prep_docs, deal_with_workspace
 from jina import Flow
 
@@ -25,7 +26,7 @@ def index(num_docs: int = max_docs):
     flow = (
         Flow()
         .add(
-            uses="jinahub+docker://TransformerTorchEncoder",
+            uses=TransformerTorchEncoder,
             pretrained_model_name_or_path=model,
             name="encoder",
             max_length=50,
@@ -49,7 +50,7 @@ def query_restful():
     flow = (
         Flow()
         .add(
-            uses="jinahub+docker://TransformerTorchEncoder",
+            uses="TransformerTorchEncoder",
             pretrained_model_name_or_path=model,
             name="encoder",
             max_length=50,
