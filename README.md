@@ -42,6 +42,7 @@ We're dealing with big language models and quite long text passages. Macs can ap
 
 ```shell
 # Don't bother if you're on a Mac or have loads of memory
+cd /tmp
 dd if=/dev/zero of=swapfile bs=1M count=10240 status=progress
 chmod 600 swapfile
 mkswap swapfile
@@ -53,7 +54,6 @@ You'll need to do this after every reboot. Or you can [read the instructions](ht
 ### Download dataset
 
 ```shell
-cd backend
 python get_data.py
 ```
 
@@ -82,9 +82,11 @@ python app.py -t query_restful
 In another terminal:
 
 ```sh
-cd jina-app-store-example/
+git clone https://github.com/alexcg1/jina-app-store-frontend.git
+cd jina-app-store-frontend
+virtualenv env
 source env/bin/activate
-cd frontend
+pip install -r requirements.txt
 streamlit app.py
 ```
 
