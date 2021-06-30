@@ -4,7 +4,7 @@ COPY . /workspace
 WORKDIR /workspace
 
 RUN apt-get update
-RUN apt-get -y install wget
+RUN apt-get -y install git
 RUN pip install -r requirements.txt
 
 WORKDIR "backend"
@@ -26,4 +26,4 @@ LABEL platform="linux/amd64"
 LABEL update="None"
 LABEL url="https://github.com/alexcg1/jina-app-store-example"
 LABEL vendor="Jina AI Limited"
-LABEL version="0.5"
+LABEL version="0.6"
