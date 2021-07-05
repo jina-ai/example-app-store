@@ -33,6 +33,7 @@ class DiskIndexer(Executor):
 
     @requests(on="/search")
     def search(self, docs: "DocumentArray", **kwargs):
+        print(f"\tSearching index of {len(self._docs)} Documents for \"{docs[0].text}\"")
         a = np.stack(docs.get_attributes("embedding"))
         b = np.stack(self._docs.get_attributes("embedding"))
         q_emb = _ext_A(_norm(a))
