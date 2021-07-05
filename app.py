@@ -1,13 +1,11 @@
 __copyright__ = "Copyright (c) 2021 Jina AI Limited. All rights reserved."
 __license__ = "Apache-2.0"
 
-import os
-import shutil
-import sys
 import click
 from backend_config import max_docs, datafile, port, workdir, model
 
 from executors.disk_indexer import DiskIndexer
+from executors.encoder import MyTransformer
 from jinahub.text.encoders.transform_encoder import TransformerTorchEncoder
 from helper import prep_docs, deal_with_workspace
 from jina import Flow
@@ -26,12 +24,13 @@ def index(num_docs: int = max_docs):
     flow = (
         Flow()
         .add(
-            uses=TransformerTorchEncoder,
+            uses=MyTransformer,
             pretrained_model_name_or_path=model,
             name="encoder",
             max_length=50,
         )
         .add(uses=DiskIndexer, workspace=workdir, name="indexer")
+        # .add(uses=LMDBIndexer, workspace=workdir, name="indexer")
     )
 
     with flow:
@@ -50,12 +49,13 @@ def query_restful():
     flow = (
         Flow()
         .add(
-            uses="TransformerTorchEncoder",
+            uses=MyTransformer,
             pretrained_model_name_or_path=model,
             name="encoder",
             max_length=50,
         )
         .add(uses=DiskIndexer, workspace=workdir, name="indexer")
+        # .add(uses=LMDBIndexer, workspace=workdir, name="indexer")
     )
 
     with flow:
