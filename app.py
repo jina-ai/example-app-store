@@ -22,7 +22,7 @@ def index(num_docs: int = max_docs):
     flow = (
         Flow()
         .add(
-            uses='jinahub+docker://TransformerTorchEncoder',
+            uses='jinahub://TransformerTorchEncoder',
             pretrained_model_name_or_path=model,
             name="encoder",
             max_length=50,
@@ -47,7 +47,7 @@ def query_restful():
     flow = (
         Flow()
         .add(
-            uses='jinahub+docker://TransformerTorchEncoder',
+            uses='jinahub://TransformerTorchEncoder',
             pretrained_model_name_or_path=model,
             name="encoder",
             max_length=50,
