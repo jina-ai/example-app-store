@@ -1,2 +1,2 @@
-jina[http,transformers,torch,hub]==2.0.0
+jina[http,hub]
 pandas==1.2.5
