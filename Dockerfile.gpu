@@ -1,9 +1,11 @@
-FROM jinaai/jina:2.0-standard
+FROM pytorch/pytorch:1.9.0-cuda10.2-cudnn7-runtime
+
 ARG docs_to_index=100
 
 RUN apt-get update && apt-get -y install wget git 
-RUN pip install torch>=1.1.0
+RUN pip install jina[standard]==2.0.4
 RUN jina hub pull jinahub://TransformerTorchEncoder --install-requirements
+
 
 COPY . /workspace
 WORKDIR /workspace
