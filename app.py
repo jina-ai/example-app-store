@@ -4,15 +4,13 @@ __license__ = "Apache-2.0"
 import click
 from backend_config import max_docs, datafile, port, workdir, model
 
-from executors.disk_indexer import DiskIndexer
-# from jinahub.indexers import simple as SimpleIndexer
+# from executors.disk_indexer import DiskIndexer
 from jinahub.indexers.simple import SimpleIndexer
 from helper import prep_docs, deal_with_workspace
 from jina import Flow
 
 # encoder = 'jinahub://TransformerSentenceEncoder'
 encoder = 'jinahub://TransformerTorchEncoder'
-# encoder = 'jinahub://u9pqs8eb'
 # indexer = DiskIndexer
 indexer = SimpleIndexer
 
@@ -36,7 +34,6 @@ def index(num_docs: int = max_docs):
             max_length=50,
         )
         .add(uses=indexer, workspace=workdir, name="indexer", dump_path=workdir, override_with={"index_file_name":"index.json"})
-        # .add(uses=LMDBIndexer, workspace=workdir, name="indexer")
     )
 
     with flow:
@@ -61,7 +58,6 @@ def query_restful():
             max_length=50,
         )
         .add(uses=indexer, workspace=workdir, name="indexer", dump_path=workdir, override_with={"index_file_name":"index.json"})
-        # .add(uses=indexer, workspace=workdir, name="indexer")
     )
 
     with flow:
