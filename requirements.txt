@@ -1,2 +1,4 @@
-jina[http,transformers,torch,hub]==2.0.0
+jina[http,transformers,torch,hub]==2.0
 pandas==1.2.5
+git+https://github.com/jina-ai/jina-commons
+git+https://github.com/jina-ai/executor-indexers.git@feat-memmapindexer

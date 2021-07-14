@@ -5,8 +5,16 @@ import click
 from backend_config import max_docs, datafile, port, workdir, model
 
 from executors.disk_indexer import DiskIndexer
+# from jinahub.indexers import simple as SimpleIndexer
+from jinahub.indexers.simple import SimpleIndexer
 from helper import prep_docs, deal_with_workspace
 from jina import Flow
+
+# encoder = 'jinahub://TransformerSentenceEncoder'
+encoder = 'jinahub://TransformerTorchEncoder'
+# encoder = 'jinahub://u9pqs8eb'
+# indexer = DiskIndexer
+indexer = SimpleIndexer
 
 try:
     __import__("pretty_errors")
@@ -22,12 +30,12 @@ def index(num_docs: int = max_docs):
     flow = (
         Flow()
         .add(
-            uses='jinahub://TransformerTorchEncoder',
+            uses=encoder,
             pretrained_model_name_or_path=model,
             name="encoder",
             max_length=50,
         )
-        .add(uses=DiskIndexer, workspace=workdir, name="indexer")
+        .add(uses=indexer, workspace=workdir, name="indexer", dump_path=workdir, override_with={"index_file_name":"index.json"})
         # .add(uses=LMDBIndexer, workspace=workdir, name="indexer")
     )
 
@@ -47,13 +55,13 @@ def query_restful():
     flow = (
         Flow()
         .add(
-            uses='jinahub://TransformerTorchEncoder',
+            uses=encoder,
             pretrained_model_name_or_path=model,
             name="encoder",
             max_length=50,
         )
-        .add(uses=DiskIndexer, workspace=workdir, name="indexer")
-        # .add(uses=LMDBIndexer, workspace=workdir, name="indexer")
+        .add(uses=indexer, workspace=workdir, name="indexer", dump_path=workdir, override_with={"index_file_name":"index.json"})
+        # .add(uses=indexer, workspace=workdir, name="indexer")
     )
 
     with flow:
