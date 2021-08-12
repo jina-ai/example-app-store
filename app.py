@@ -2,39 +2,36 @@ __copyright__ = "Copyright (c) 2021 Jina AI Limited. All rights reserved."
 __license__ = "Apache-2.0"
 
 import click
-from backend_config import max_docs, datafile, port, workdir, model
+from backend_config import max_docs, datafile, port, workdir
 
-# from executors.disk_indexer import DiskIndexer
-from jinahub.indexers.simple import SimpleIndexer
 from helper import prep_docs, deal_with_workspace
 from jina import Flow
-
-# encoder = 'jinahub://TransformerSentenceEncoder'
-encoder = 'jinahub://TransformerTorchEncoder'
-# indexer = DiskIndexer
-indexer = SimpleIndexer
 
 try:
     __import__("pretty_errors")
 except ImportError:
     pass
 
+flow = (
+    Flow()
+    .add(
+        name="encoder",
+        uses="jinahub+docker://TransformerTorchEncoder",
+    )
+    .add(
+        name="indexer",
+        uses="jinahub+docker://SimpleIndexer",
+        uses_with={"index_file_name": "index"},
+        uses_metas={"workspace": "workspace"},
+        volumes="./workspace:/workspace/workspace",
+    )
+)
 
 def index(num_docs: int = max_docs):
     """
     Build an index for your search
     :param num_docs: maximum number of Documents to index
     """
-    flow = (
-        Flow()
-        .add(
-            uses=encoder,
-            pretrained_model_name_or_path=model,
-            name="encoder",
-            max_length=50,
-        )
-        .add(uses=indexer, workspace=workdir, name="indexer", dump_path=workdir, override_with={"index_file_name":"index.json"})
-    )
 
     with flow:
         flow.post(
@@ -49,17 +46,6 @@ def query_restful():
     """
     Query your index
     """
-    flow = (
-        Flow()
-        .add(
-            uses=encoder,
-            pretrained_model_name_or_path=model,
-            name="encoder",
-            max_length=50,
-        )
-        .add(uses=indexer, workspace=workdir, name="indexer", dump_path=workdir, override_with={"index_file_name":"index.json"})
-    )
-
     with flow:
         flow.protocol = "http"
         flow.port_expose = port
