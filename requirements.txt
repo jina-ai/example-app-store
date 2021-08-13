@@ -1,2 +1,2 @@
-jina[http,hub]==2.0
+jina[http,hub]==2.0.18
 pandas==1.2.5
