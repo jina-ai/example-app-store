@@ -15,11 +15,11 @@ except ImportError:
 flow = (
     Flow()
     .add(
-        name="encoder",
+        name="app_store_encoder",
         uses="jinahub+docker://TransformerTorchEncoder",
     )
     .add(
-        name="indexer",
+        name="app_store_indexer",
         uses="jinahub+docker://SimpleIndexer",
         uses_with={"index_file_name": "index"},
         uses_metas={"workspace": "workspace"},
