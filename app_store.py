@@ -20,7 +20,7 @@ flow = (
     )
     .add(
         name="app_store_indexer",
-        uses="jinahub+docker://SimpleIndexer",
+        uses="jinahub+docker://SimpleIndexer/old",
         uses_with={"index_file_name": "index", "default_top_k": 12},
         # uses_metas={"workspace": "workspace"},
         volumes="./workspace:/workspace/workspace",
