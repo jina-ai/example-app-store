@@ -4,7 +4,7 @@ Description=Text backend for Jina app store search
 [Service]
 User=ubuntu
 WorkingDirectory=/home/ubuntu/alexcg/app-search/backend-text
-ExecStart=/bin/bash -c 'cd /home/ubuntu/alexcg/app-search/backend-text && source env/bin/activate && python app.py -t query_restful'
+ExecStart=/bin/bash -c 'cd /home/ubuntu/alexcg/app-search/backend-text && source env/bin/activate && python app_store.py -t query_restful'
 Restart=always
 
 [Install]
