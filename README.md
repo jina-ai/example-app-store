@@ -1,6 +1,6 @@
 # AI-powered app store search
 
-![](./video.gif)
+![](./demo.gif)
 
 This is a simple example to show how to build an AI-powered search engine for an app store using the [Jina](https://github.com/jina-ai/jina/) framework. It indexes and searches a subset of the [17K Mobile Strategy Games dataset](https://www.kaggle.com/tristan581/17k-apple-app-store-strategy-games) from Kaggle.
 
