@@ -1,35 +1,25 @@
-__copyright__ = "Copyright (c) 2021 Jina AI Limited. All rights reserved."
-__license__ = "Apache-2.0"
-
 import click
-from config import max_docs, datafile, port, workdir, MODEL
-
+from config import max_docs, datafile, port, workdir
 from helper import prep_docs, deal_with_workspace
 from jina import Flow
-
-try:
-    __import__("pretty_errors")
-except ImportError:
-    pass
 
 flow = (
     Flow()
     .add(
         name="encoder",
-        # uses="jinahub://SpacyTextEncoder/v0.3",
         uses="jinahub://TransformerTorchEncoder/v0.3",
-        # uses_with={"model_name": MODEL},
         install_requirements=True,
-        force=True
+        force=True,
     )
     .add(
         name="indexer",
         uses="jinahub://SimpleIndexer/v0.11",
         uses_with={"index_file_name": "index"},
         install_requirements=True,
-        force=True
+        force=True,
     )
 )
+
 
 def index(num_docs: int = max_docs):
     """
@@ -43,7 +33,7 @@ def index(num_docs: int = max_docs):
             inputs=prep_docs(input_file=datafile, num_docs=num_docs),
             request_size=64,
             read_mode="r",
-            show_progress=True
+            show_progress=True,
         )
 
 
