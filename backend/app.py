@@ -15,17 +15,17 @@ except ImportError:
 flow = (
     Flow()
     .add(
-        name="app_store_encoder",
-        uses="jinahub://TransformerTorchEncoder",
-        install_requirements=True
+        name="encoder",
+        uses="jinahub://SpacyTextEncoder/v0.3",
+        install_requirements=True,
+        force=True
     )
     .add(
-        name="app_store_indexer",
-        uses="jinahub://SimpleIndexer/",
-        uses_with={"index_file_name": "index", "default_top_k": 12},
-        # uses_metas={"workspace": "workspace"},
-        volumes="./workspace:/workspace/workspace",
-        install_requirements=True
+        name="indexer",
+        uses="jinahub://SimpleIndexer/v0.11",
+        uses_with={"index_file_name": "index"},
+        install_requirements=True,
+        force=True
     )
 )
 
