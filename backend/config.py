@@ -1,5 +1,5 @@
 # in executors.py
-model = "sentence-transformers/msmarco-distilbert-base-v3" # Language model will we use to "understand" the text
+MODEL = "en_core_web_md" # Language model will we use to "understand" the text
 top_k = 10 # How many results will a query return?
 
 # in app.py
