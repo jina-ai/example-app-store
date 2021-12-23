@@ -2,7 +2,7 @@ __copyright__ = "Copyright (c) 2021 Jina AI Limited. All rights reserved."
 __license__ = "Apache-2.0"
 
 import click
-from backend_config import max_docs, datafile, port, workdir
+from config import max_docs, datafile, port, workdir
 
 from helper import prep_docs, deal_with_workspace
 from jina import Flow
@@ -16,14 +16,16 @@ flow = (
     Flow()
     .add(
         name="app_store_encoder",
-        uses="jinahub+docker://TransformerTorchEncoder",
+        uses="jinahub://TransformerTorchEncoder",
+        install_requirements=True
     )
     .add(
         name="app_store_indexer",
-        uses="jinahub+docker://SimpleIndexer/old",
+        uses="jinahub://SimpleIndexer/",
         uses_with={"index_file_name": "index", "default_top_k": 12},
         # uses_metas={"workspace": "workspace"},
         volumes="./workspace:/workspace/workspace",
+        install_requirements=True
     )
 )
 
@@ -42,7 +44,7 @@ def index(num_docs: int = max_docs):
         )
 
 
-def query_restful():
+def search():
     """
     Query your index
     """
@@ -56,7 +58,7 @@ def query_restful():
 @click.option(
     "--task",
     "-t",
-    type=click.Choice(["index", "query_restful"], case_sensitive=False),
+    type=click.Choice(["index", "search"], case_sensitive=False),
 )
 @click.option("--num_docs", "-n", default=max_docs)
 @click.option("--force", "-f", is_flag=True)
@@ -65,9 +67,9 @@ def main(task: str, num_docs: int, force: bool):
         deal_with_workspace(dir_name=workdir, should_exist=False, force_remove=force)
         index(num_docs=num_docs)
 
-    if task == "query_restful":
+    if task == "search":
         deal_with_workspace(dir_name=workdir, should_exist=True)
-        query_restful()
+        search()
 
 
 if __name__ == "__main__":

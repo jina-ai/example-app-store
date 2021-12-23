@@ -7,7 +7,7 @@ import csv
 from typing import Generator
 from jina import Document
 
-from backend_config import (
+from config import (
     text_length,
     max_docs,
 )
@@ -53,15 +53,18 @@ def prep_docs(input_file: str, num_docs: int = max_docs) -> Generator:
             doc.tags = row
             yield doc
 
-def deal_with_workspace(dir_name, should_exist: bool = False, force_remove: bool = False):
+
+def deal_with_workspace(
+    dir_name, should_exist: bool = False, force_remove: bool = False
+):
     if should_exist:
-        if not os.path.isdir(dir_name): # It should exist but it doesn't exist
+        if not os.path.isdir(dir_name):  # It should exist but it doesn't exist
             print(
                 f"The directory {dir_name} does not exist. Please index first via `python app.py -t index`"
             )
             sys.exit(1)
 
-    if not should_exist: # it shouldn't exist
+    if not should_exist:  # it shouldn't exist
         if os.path.isdir(dir_name):
             if not force_remove:
                 print(
@@ -74,4 +77,3 @@ def deal_with_workspace(dir_name, should_exist: bool = False, force_remove: bool
                 sys.exit(1)
             else:
                 shutil.rmtree(dir_name)
-
