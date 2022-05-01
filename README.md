@@ -87,7 +87,7 @@ cd jina-app-store-frontend
 virtualenv env
 source env/bin/activate
 pip install -r requirements.txt
-streamlit app.py
+streamlit run app.py
 ```
 
 Then open http://localhost:8501 in your browser
