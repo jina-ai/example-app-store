@@ -59,7 +59,7 @@ python get_data.py
 
 This command creates a directory called `data` and downloads the [17K Mobile Strategy Games dataset](https://www.kaggle.com/tristan581/17k-apple-app-store-strategy-games) into it. It then shuffles it to ensure we get a diverse range of apps to search through.
 
-💡 **Tip**: We shuffle using a fixed random seed of `42`, so every shuffle will be the same. Want a different shuffle? Change it in [`backend_config.py`](./backend/backend_config.py)
+💡 **Tip**: We shuffle using a fixed random seed of `42`, so every shuffle will be the same. Want a different shuffle? Change it in [`config.py`](./backend/config.py)
 
 ### Index your data
 
@@ -116,7 +116,7 @@ This is just a demo search engine. It has no functionality beyond that.
 
 ### How can I change basic settings?
 
-Edit `backend/backend_config.py`
+Edit `backend/config.py` or `frontend/config.py`
 
 ### What are all these files?
 
@@ -127,13 +127,17 @@ After cloning, downloading the dataset and indexing data, you'll see a lot of fi
 | 📂    | `data`                        | Folder for storing downloaded dataset             |
 | -- 📄 | `appstore_games.csv`          | Original dataset                                  |
 | -- 📄 | `appstore_games_shuffled.csv` | Processed dataset that we'll index                |
-| 📂    | `executors`                   | Folder to store Executors we write ourself        |
-| -- 📄 | `disk_indexer.py`             | Executor to build an on-disk index                |
+| 📂    | `backend`                     | Folder to store backend side files                |
+| -- 📄 | `config.py`                   | Basic config settings on backend side             |
+| -- 📄 | `app.py`                      | Our main program file for backend side            |
+| -- 📄 | `helper.py`                   | Helper functions                                  |
+| 📂    | `frontend`                   | Folder to store frontend side files                |
+| -- 📄 | `config.py`                   | Basic config settings on frontend side            |
+| -- 📄 | `frontend.py`                 | Our main program file for frontend side           |
+| -- 📄 | `helper.py`                   | Helper functions                                  |
 | 📂    | `workspace`                   | Folder to store indexed data                      |
-| 📄    | `app.py`                      | Our main program file                             |
-| 📄    | `backend_config.py`           | Basic config settings                             |
 | 📄    | `get_data.py`                 | Script to retrieve dataset                        |
-| 📄    | `helper.py`                   | Helper functions go here to ensure clean `app.py` |
+
 
 You may also see several `__pycache__` folders with `.pyc` files. Don't worry about these. [They're explained here](https://stackoverflow.com/a/16869074) if you really want to know.
 

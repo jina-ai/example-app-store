@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from backend_config import dataset_url, dataset_filename, random_seed
+from backend.config import dataset_url, dataset_filename, random_seed
 
 datadir = "data"
 
